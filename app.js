@@ -32,9 +32,9 @@ let budgetController = (function () {
             }
 
             if (type === 'exp') {
-                newItem = new Expense(id, des, val)
+                newItem = new Expense(ID, des, val)
             } else if (type === 'inc') {
-                newItem = new Income(id, des, val)
+                newItem = new Income(ID, des, val)
             }
 
             data.allItems[type].push(newItem);
@@ -54,8 +54,10 @@ let UIController = (function () {
     let DOMStrings = {
         inputType: '.add__type',
         inputDescription: '.add__description',
-        inputValue: 'add__value',
-        inputBtn: '.add__btn'
+        inputValue: '.add__value',
+        inputBtn: '.add__btn',
+        incomeContainer: '.income__list',
+        expensesContainer: '.expenses__list',
     }
     return {
         getInput: function () {
@@ -67,16 +69,31 @@ let UIController = (function () {
 
         },
         addListItem: function(obj, type){
-            let html;
+            let html, newHtml;
             if(type === 'inc'){
+                element = DOMStrings.incomeContainer;
                 html = '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             } else if (type === 'exp'){
+                element = DOMStrings.expensesContainer;
                 html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">%percentage%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             }
+            // replace the placeholder text with actual text
+            newHtml = html.replace('%id%', obj.ID);
+            newHtml = newHtml.replace('%description%', obj.description);
+            newHtml = newHtml.replace('%value%', obj.value);
+
+            //insert html into the dom
+            document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
+        },
+        clearFields: function(){
+            let fields;
+            fields = document.querySelectorAll(DOMStrings.inputDescription + ',' + DOMStrings.inputValue);
+            Array.prototype.slice.call(fields);
         },
         getDOMStrings: function () {
             return DOMStrings;
         }
+
     }
 })();
 
@@ -99,6 +116,7 @@ let appController = (function (budgetCtrl, UICtrl) {
 
         input = UICtrl.getInput();
         newItem = budgetCtrl.addItem(input.type, input.description, input.value);
+        UICtrl.addListItem(newItem, input.type);
     };
 
     return {
